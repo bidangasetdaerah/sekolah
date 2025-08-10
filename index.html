@@ -69,7 +69,6 @@
 </div>
 
 <script>
-  // ID spreadsheet dan nama sheet
   const spreadsheetId = "1fQimRhuFVbZ904FHB0KGTMjYFQclCPEqJWQRRUV_Lts";
   const sheetName = "rekap";
   const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${sheetName}`;
@@ -77,21 +76,22 @@
   fetch(url)
     .then((response) => response.text())
     .then((csv) => {
-      // Pisahkan baris dan kolom, regex agar tidak terpecah di koma dalam tanda kutip
       const rows = csv
         .split("\n")
-        .map((r) => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-
+        .map((r) => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)); // Split koma tapi abaikan koma dalam tanda petik
       const tableBody = document.querySelector("#dataTable tbody");
 
-      // Mulai dari baris ke-2 (index 1), karena index 0 adalah header CSV
+      // Mulai dari baris ke-2 (index 1) untuk ambil data (baris 1 adalah header CSV)
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
-        if (!row || row.length < 9) continue; // pastikan data lengkap
+        if (!row || row.length < 9) continue; // Skip baris tidak lengkap
 
         let tr = document.createElement("tr");
 
-        // Loop kolom 0 sampai 8 sesuai header tabel
+        // Kolom 0-8 sesuai urutan:
+        // No, Kode Barang, Nama Barang, Informasi Barang, Tanggal Perolehan,
+        // Harga Beli / Perolehan, Keadaan Barang, Foto, Keterangan
+
         for (let j = 0; j <= 8; j++) {
           let td = document.createElement("td");
           let cell = (row[j] ?? "").replace(/(^"|"$)/g, "").trim();
@@ -101,6 +101,7 @@
             if (cell) {
               let btn = document.createElement("button");
               btn.className = "btn btn-link p-0";
+              btn.title = "Lihat Foto";
               btn.innerHTML =
                 '<i class="bi bi-camera-fill text-primary fs-4"></i>';
               btn.onclick = () => {
